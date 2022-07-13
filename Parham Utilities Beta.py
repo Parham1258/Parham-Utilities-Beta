@@ -8,16 +8,17 @@ import multiprocessing
 def hosting():
   from flask import Flask
   from waitress import serve
-  app = Flask('app')
-  @app.route('/')
+  app = Flask("app")
+  @app.route("/")
   def bot():
     return "Working...!"
-  serve(app, host='0.0.0.0', port=80)
+  serve(app, host="0.0.0.0", port=80)
 hosted = multiprocessing.Process(target = hosting)
 hosted.start()
 import os
 import disnake
 from disnake.ext import commands
+import random
 import sys
 import requests
 
@@ -54,32 +55,31 @@ clear_console()
 client = commands.Bot(command_prefix="!>", help_command=None, intents=disnake.Intents.all(), case_insensitive=True)
 @client.event
 async def on_ready():
-  await client.change_presence(activity=disnake.Game(name="!>help"))
+  await client.change_presence(activity=disnake.Game(name="\"!>help\""), status=disnake.Status.dnd)
   print(color.Green+"Bot Is Working!")
 @client.event
 async def on_message(message): # Chat Syncing Betweeen Scratch Servers
-  guilds = [981077071210119228, 973245403476656168]
-  channels = [995718966393716817, 995721726480621618]
-  if message.author.bot or message.content == "": return
-  if message.guild.id in guilds and message.channel.id in channels and len(str(message.author)) < 32 and len(message.content) < 1800 and not message.content.endswith("\\"):
-    for channel in channels:
-      channel = disnake.utils.get(client.get_all_channels(), id=channel)
-      webhook = disnake.utils.get(await channel.webhooks(), name="Parham Utilities Beta")
-      if webhook is None:
-        webhook = await channel.create_webhook(name="Parham Utilities Beta")
-      await webhook.send(message.content+"\n\n*Server:* `"+message.guild.name+"`\n*Channel:* <#"+str(message.channel.id)+">", username=str(message.author), avatar_url=message.author.avatar, files=[await file.to_file() for file in message.attachments], allowed_mentions= disnake.AllowedMentions(users=False, roles=False, everyone=False, replied_user=False))
-  await client.process_commands(message)
-@client.event
+  if not message.author.bot and not message.content == "":
+    guilds = [981077071210119228, 973245403476656168]
+    channels = [995718966393716817, 995721726480621618]
+    if message.guild.id in guilds and message.channel.id in channels and len(str(message.author)) < 32 and len(message.content) < 1800 and not message.content.endswith("\\"):
+      for channel in channels:
+        channel = disnake.utils.get(client.get_all_channels(), id=channel)
+        webhook = disnake.utils.get(await channel.webhooks(), name="Parham Utilities Beta")
+        if webhook is None:
+          webhook = await channel.create_webhook(name="Parham Utilities Beta")
+        await webhook.send(message.content+"\n\n*Server:* `"+message.guild.name+"`\n*Channel:* <#"+str(message.channel.id)+">", username=str(message.author), avatar_url=message.author.avatar, files=[await file.to_file() for file in message.attachments], allowed_mentions= disnake.AllowedMentions(users=False, roles=False, everyone=False, replied_user=False))
+    await client.process_commands(message)
+  return
+@client.event 
 async def on_command_error(ctx, error): 
-  if isinstance(error, commands.CommandNotFound):
-    await ctx.send(embed=disnake.Embed(title="Error!", description="CMD Not Found", color=0xFF0000))
-import random
+  if isinstance(error, commands.CommandNotFound): await ctx.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\nCommand Not Found", color=0xFF0000))
 @client.command()
 async def help(ctx):
   await ctx.send(embed=disnake.Embed(title="Help", description="`!>credits` *See Our Developers*\n`!>chatbot {message}` *Chat With Bot*\n`!>uptime` Bot Up Time\n`/sudo {member} {message}` *Copy Someone*\n**More Soon...**", color=0x3EC70B))
 @client.command()
 async def ping(ctx):
-    await ctx.send(f"Pong! My Ping Is `{round(client.latency*1000)}`")
+    await ctx.send("Pong! 🏓 My Ping Is `"+str(round(client.latency*1000))+"`")
 @client.command()
 async def exit(ctx):
   if ctx.author.id == 740442702851604510:
@@ -87,7 +87,7 @@ async def exit(ctx):
     await client.close()
     global hosted
     hosted.terminate()
-    sys.exit()
+    sys.exit(3)
 @client.command()
 async def credits(ctx):
   await ctx.send(embed=disnake.Embed(title="Credits", description="Made By Parham\nCredits:\n> NPC\nThanks Number1 For Helping Alot!", color=random.randint(0, 16777215)))
@@ -136,7 +136,8 @@ async def evalpy(inter, command: str, ephemeral: bool = True):
   if inter.author.id == 740442702851604510:
     try:
       output = eval(command)
-      await inter.send("Eval Complete!", embed=disnake.Embed(title="Eval Complete!", description="Eval Complete! Output:\n```\n"+output+"\n```", color=random.randint(0, 16777215)), ephemeral=ephemeral)
+      await inter.send("Eval Complete!", embed=disnake.Embed(title="Eval Complete!", description="Eval Complete! Output:\n```\n"+str(output)+"\n```", color=random.randint(0, 16777215)), ephemeral=ephemeral)
     except Exception as error: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\n```\n"+str(error)+"\n```", color=0xFF0000), ephemeral=ephemeral)
   else: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\nYou Don't Own This Bot", color=0xFF0000), ephemeral=True)
 client.run(os.environ["Token"])
+sys.exit(2)
