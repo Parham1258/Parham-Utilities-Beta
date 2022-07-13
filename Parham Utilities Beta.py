@@ -96,10 +96,6 @@ async def uptime(ctx):
   global uptimes
   await ctx.send(embed=disnake.Embed(title="Up Time", description=f"Up Time: <t:{uptimes}:R>", color=0x66FFFF))
 @client.command()
-async def evalpy(ctx, *, arg):
-  if ctx.author.id == 740442702851604510:
-    await ctx.send(embed=disnake.Embed(title="Eval", description=f"Eval Done!\n```\n{eval(arg)}\n```", color=random.randint(0, 16777215)))
-@client.command()
 async def chatbot(ctx, *, arg):
   try: 
     msg = arg.replace(" ", "+")
