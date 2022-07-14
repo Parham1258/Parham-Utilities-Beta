@@ -63,12 +63,18 @@ async def on_message(message): # Chat Syncing Betweeen Scratch Servers
     guilds = [981077071210119228, 973245403476656168]
     channels = [995718966393716817, 995721726480621618]
     if message.guild.id in guilds and message.channel.id in channels and len(str(message.author)) < 32 and len(message.content) < 1800 and not message.content.endswith("\\"):
+      channels.remove(message.channel.id)
       for channel in channels:
-        channel = disnake.utils.get(client.get_all_channels(), id=channel)
-        webhook = disnake.utils.get(await channel.webhooks(), name="Parham Utilities Beta")
-        if webhook is None:
-          webhook = await channel.create_webhook(name="Parham Utilities Beta")
-        await webhook.send(message.content+"\n\n*Server:* `"+message.guild.name+"`\n*Channel:* <#"+str(message.channel.id)+">", username=str(message.author), avatar_url=message.author.avatar, files=[await file.to_file() for file in message.attachments], allowed_mentions= disnake.AllowedMentions(users=False, roles=False, everyone=False, replied_user=False))
+        try:
+          channel = disnake.utils.get(client.get_all_channels(), id=channel)
+          webhook = None
+          for webhooks in await message.channel.webhooks():
+            if webhooks.user.id == client.user.id:
+              webhook = disnake.utils.get(await channel.webhooks(), name="Parham Utilities Beta")
+              break
+          if webhook is None: webhook = await channel.create_webhook(name="Parham Utilities Beta")
+          await webhook.send(message.content+"\n\n*Server:* `"+message.guild.name+"`\n*Channel:* <#"+str(message.channel.id)+">", username=str(message.author), avatar_url=message.author.avatar, files=[await file.to_file() for file in message.attachments], allowed_mentions= disnake.AllowedMentions(users=False, roles=False, everyone=False, replied_user=False))
+        except: pass
     await client.process_commands(message)
   return
 @client.event 
@@ -114,7 +120,11 @@ async def sudo(inter, member: disnake.Member, message: str):
   message: Message To Be Said
   """
   try:
-    webhook = disnake.utils.get(await inter.channel.webhooks(), name="Parham Utilities Beta")
+    webhook = None
+    for webhooks in await inter.channel.webhooks():
+      if webhooks.user.id == inter.bot.user.id:
+        webhook = disnake.utils.get(await inter.channel.webhooks(), name="Parham Utilities Beta")
+        break
     if webhook is None: webhook = await inter.channel.create_webhook(name="Parham Utilities Beta")
     await webhook.send(message[0:2000], avatar_url=member.avatar, username=member.display_name, allowed_mentions= disnake.AllowedMentions(users=True, roles=False, everyone=False, replied_user=False))
     await inter.send("Successfully ✔️", embed=disnake.Embed(title="Successfully ✔️", description="Successfully Sent Message As `"+member.display_name+"`", color=random.randint(0, 16777215)), ephemeral=True)
