@@ -127,7 +127,27 @@ async def sudo(inter, member: disnake.Member, message: str):
         break
     if webhook is None: webhook = await inter.channel.create_webhook(name="Parham Utilities Beta")
     await webhook.send(message[0:2000], avatar_url=member.avatar, username=member.display_name, allowed_mentions= disnake.AllowedMentions(users=True, roles=False, everyone=False, replied_user=False))
-    await inter.send("Successfully ✔️", embed=disnake.Embed(title="Successfully ✔️", description="Successfully Sent Message As `"+member.display_name+"`", color=random.randint(0, 16777215)), ephemeral=True)
+    await inter.send("Successfully ✔️", embed=disnake.Embed(title="Successfully ✔️", description="Successfully Sent Message As "+member.mention, color=random.randint(0, 16777215)), ephemeral=True)
+  except Exception as error: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\n```\n"+str(error)+"\n```", color=0xFF0000), ephemeral=True)
+@client.slash_command(dm_permission=False)
+async def sudo_username(inter, username: str, message: str):
+  """
+  Sudo Username
+
+  Parameters
+  ----------
+  username: Username
+  message: Message To Be Said
+  """
+  try:
+    webhook = None
+    for webhooks in await inter.channel.webhooks():
+      if webhooks.user.id == inter.bot.user.id:
+        webhook = disnake.utils.get(await inter.channel.webhooks(), name="Parham Utilities Beta")
+        break
+    if webhook is None: webhook = await inter.channel.create_webhook(name="Parham Utilities Beta")
+    await webhook.send(message[0:2000], username=username, allowed_mentions= disnake.AllowedMentions(users=True, roles=False, everyone=False, replied_user=False))
+    await inter.send("Successfully ✔️", embed=disnake.Embed(title="Successfully ✔️", description="Successfully Sent Message As `"+username+"`", color=random.randint(0, 16777215)), ephemeral=True)
   except Exception as error: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\n```\n"+str(error)+"\n```", color=0xFF0000), ephemeral=True)
 @client.slash_command()
 async def evalpy(inter, command: str, ephemeral: bool = True):
@@ -141,7 +161,11 @@ async def evalpy(inter, command: str, ephemeral: bool = True):
   """
   if inter.author.id == 740442702851604510:
     try:
-      output = eval(command)
+      if command.startswith("await "):
+        command_space = command.split(" ")
+        command_space.remove("await")
+        output = await eval(" ".join(command_space))
+      else: output = eval(command)
       await inter.send("Eval Complete!", embed=disnake.Embed(title="Eval Complete!", description="Eval Complete! Output:\n```\n"+str(output)+"\n```", color=random.randint(0, 16777215)), ephemeral=ephemeral)
     except Exception as error: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\n```\n"+str(error)+"\n```", color=0xFF0000), ephemeral=ephemeral)
   else: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\nYou Don't Own This Bot", color=0xFF0000), ephemeral=True)
