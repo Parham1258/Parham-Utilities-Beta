@@ -82,7 +82,7 @@ async def on_command_error(ctx, error):
   if isinstance(error, commands.CommandNotFound): await ctx.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\nCommand Not Found", color=0xFF0000))
 @client.command()
 async def help(ctx):
-  await ctx.send(embed=disnake.Embed(title="Help", description="`!>credits` *See Our Developers*\n`!>chatbot {message}` *Chat With Bot*\n`!>uptime` Bot Up Time\n`/sudo {member} {message}` *Copy Someone*\n**More Soon...**", color=0x3EC70B))
+  await ctx.send(embed=disnake.Embed(title="Help", description="`!>credits` *See Our Developers*\n`!>chatbot {message}` *Chat With Bot*\n`!>uptime` Bot Up Time\n`/sudo {member} {message}` *Copy Someone*\n`/sudo_username` *Sudo Username*\n**More Soon...**", color=0x3EC70B))
 @client.command()
 async def ping(ctx):
     await ctx.send("Pong! 🏓 My Ping Is `"+str(round(client.latency*1000))+"`")
@@ -169,5 +169,15 @@ async def evalpy(inter, command: str, ephemeral: bool = True):
       await inter.send("Eval Complete!", embed=disnake.Embed(title="Eval Complete!", description="Eval Complete! Output:\n```\n"+str(output)+"\n```", color=random.randint(0, 16777215)), ephemeral=ephemeral)
     except Exception as error: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\n```\n"+str(error)+"\n```", color=0xFF0000), ephemeral=ephemeral)
   else: await inter.send("Error ❌", embed=disnake.Embed(title="Error ❌", description="Error:\nYou Don't Own This Bot", color=0xFF0000), ephemeral=True)
+class test_button(disnake.ui.Button):
+  def __init__(self):
+    super().__init__(label="Test")
+  async def callback(self, interaction): await interaction.response.send_message("Hi!")
+@client.slash_command()
+async def test(inter):
+  button = test_button()
+  view = disnake.ui.View()
+  view.add_item(button)
+  await inter.send("Test", view=view, ephemeral=True)
 client.run(os.environ["Token"])
 sys.exit(2)
